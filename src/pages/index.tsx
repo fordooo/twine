@@ -1,12 +1,17 @@
 import Head from "next/head";
-import { SignInButton, SignOutButton, useUser } from "@clerk/nextjs";
+import {
+  SignInButton,
+  SignOutButton,
+  UserButton,
+  useUser,
+} from "@clerk/nextjs";
 
-// import { api } from "~/utils/api";
+import { api } from "~/utils/api";
 
 export default function Home() {
-  // const hello = api.example.hello.useQuery({ text: "from tRPC" });
-
   const user = useUser();
+
+  const { data: posts } = api.posts.getAll.useQuery();
 
   return (
     <>
@@ -18,11 +23,25 @@ export default function Home() {
       <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c]">
         <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16 ">
           <h3 className="text-2xl font-bold text-white">Hello World</h3>
-          <div className="flex flex-col justify-center text-white">
-            <p>
+          <div className="flex flex-col justify-center  text-white">
+            <p className="mb-4 flex justify-center">
               {user.isSignedIn ? user.user.fullName : "You are not signed in"}
             </p>
-            {user.isSignedIn ? <SignOutButton /> : <SignInButton />}
+            {user.isSignedIn ? (
+              <div className="flex gap-4 text-white">
+                <UserButton />
+                <SignOutButton />
+              </div>
+            ) : (
+              <SignInButton />
+            )}
+          </div>
+          <div>
+            {posts?.map((post) => (
+              <div className="text-white" key={post.id}>
+                {post.authorId}: {post.content}
+              </div>
+            ))}
           </div>
         </div>
       </main>
