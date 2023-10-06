@@ -1,18 +1,28 @@
-import Head from "next/head";
-import Image from "next/image";
-import { SignInButton, UserButton, useUser } from "@clerk/nextjs";
-import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
-import { api } from "~/utils/api";
-import type { RouterOutputs } from "~/utils/api";
-import { LoadingSpinner } from "~/components/loading";
+import { useState } from 'react'
+import Head from 'next/head'
+import Image from 'next/image'
+import { SignInButton, UserButton, useUser } from '@clerk/nextjs'
+import dayjs from 'dayjs'
+import relativeTime from 'dayjs/plugin/relativeTime'
+import { api } from '~/utils/api'
+import type { RouterOutputs } from '~/utils/api'
+import { LoadingSpinner } from '~/components/loading'
 
-dayjs.extend(relativeTime);
+dayjs.extend(relativeTime)
 
 const CreatePostWizard = () => {
-  const { user } = useUser();
+  const { user } = useUser()
+  const [input, setInput] = useState('')
+  const ctx = api.useContext()
 
-  if (!user) return null;
+  const { mutate, isLoading: isPosting } = api.posts.create.useMutation({
+    onSuccess: () => {
+      setInput('')
+      void ctx.posts.getAll.invalidate()
+    }
+  })
+
+  if (!user) return null
 
   return (
     <div className="flex h-24 w-full items-center gap-4 border-b border-slate-400 p-4">
@@ -27,15 +37,19 @@ const CreatePostWizard = () => {
         type="text"
         placeholder="Type something"
         className="grow bg-transparent outline-none"
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        disabled={isPosting}
       />
+      <button onClick={() => mutate({ content: input })}>Post</button>
     </div>
-  );
-};
+  )
+}
 
-type PostsWithUser = RouterOutputs["posts"]["getAll"][number];
+type PostsWithUser = RouterOutputs['posts']['getAll'][number]
 
 const PostView = (props: PostsWithUser) => {
-  const { post, author } = props;
+  const { post, author } = props
 
   return (
     <div className="flex items-center gap-4 border-b border-slate-400 p-4">
@@ -50,25 +64,25 @@ const PostView = (props: PostsWithUser) => {
         <div className="flex gap-1 text-slate-300">
           <span>{`@${author.username}`}</span>
           <span>·</span>
-          <span title={dayjs(post.createdAt).format("h:mm A · MMM D, YYYY")}>
+          <span title={dayjs(post.createdAt).format('h:mm A · MMM D, YYYY')}>
             {dayjs(post.createdAt).fromNow()}
           </span>
         </div>
         <span className="text-2xl">{post.content}</span>
       </div>
     </div>
-  );
-};
+  )
+}
 
 const Feed = () => {
-  const { data: posts, isLoading } = api.posts.getAll.useQuery();
+  const { data: posts, isLoading } = api.posts.getAll.useQuery()
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
         <LoadingSpinner size={40} />
       </div>
-    );
+    )
   }
 
   return (
@@ -77,14 +91,14 @@ const Feed = () => {
         <PostView key={post.id} post={post} author={author} />
       ))}
     </>
-  );
-};
+  )
+}
 
 export default function Home() {
-  const { user, isLoaded, isSignedIn } = useUser();
+  const { user, isLoaded, isSignedIn } = useUser()
 
   // Start fetching posts ASAP
-  api.posts.getAll.useQuery();
+  api.posts.getAll.useQuery()
 
   return (
     <>
@@ -112,5 +126,5 @@ export default function Home() {
         </div>
       </div>
     </>
-  );
+  )
 }
