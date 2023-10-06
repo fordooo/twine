@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { SignInButton, UserButton, useUser } from '@clerk/nextjs'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
+import toast from 'react-hot-toast'
 import { api } from '~/utils/api'
 import type { RouterOutputs } from '~/utils/api'
 import { LoadingSpinner } from '~/components/loading'
@@ -19,11 +20,20 @@ const CreatePostWizard = () => {
     onSuccess: () => {
       setInput('')
       void ctx.posts.getAll.invalidate()
+    },
+    onError: (e) => {
+      const errorMessage = e.data?.zodError?.fieldErrors.content
+      if (!!errorMessage?.[0]) {
+        toast.error(errorMessage[0])
+      } else {
+        toast.error('Failed to post! Please try again later.')
+      }
     }
   })
 
   if (!user) return null
 
+  // TODO: refactor to use react-hook-form
   return (
     <div className="flex h-24 w-full items-center gap-4 border-b border-slate-400 p-4">
       <Image
@@ -39,9 +49,26 @@ const CreatePostWizard = () => {
         className="grow bg-transparent outline-none"
         value={input}
         onChange={(e) => setInput(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault()
+            if (input !== '') {
+              mutate({ content: input })
+            }
+          }
+        }}
         disabled={isPosting}
       />
-      <button onClick={() => mutate({ content: input })}>Post</button>
+      {input !== '' && !isPosting && (
+        <button
+          onClick={() => mutate({ content: input })}
+          disabled={isPosting}
+          className="cursor-pointer"
+        >
+          Post
+        </button>
+      )}
+      {isPosting && <LoadingSpinner size={32} />}
     </div>
   )
 }
@@ -61,10 +88,13 @@ const PostView = (props: PostsWithUser) => {
         height={56}
       />
       <div className="flex flex-col">
-        <div className="flex gap-1 text-slate-300">
+        <div className="flex items-center gap-1 text-slate-300">
           <span>{`@${author.username}`}</span>
           <span>·</span>
-          <span title={dayjs(post.createdAt).format('h:mm A · MMM D, YYYY')}>
+          <span
+            className="mt-0.5 text-sm font-light leading-normal"
+            title={dayjs(post.createdAt).format('h:mm A · MMM D, YYYY')}
+          >
             {dayjs(post.createdAt).fromNow()}
           </span>
         </div>

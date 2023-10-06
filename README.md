@@ -13,3 +13,9 @@ A Twitter/Threads style app created to test out various tech and services
 - Typesafe APIs: [tRPC](https://trpc.io)
 - Ratelimiter: [Upstash](https://upstash.com)
 - Hosting: [Vercel](https://vercel.com)
+
+### Libraries
+
+- [Zod](https://zod.dev/)
+- [dayjs](https://day.js.org/)
+- [react-hot-toast](https://react-hot-toast.com/)
