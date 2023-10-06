@@ -21,5 +21,5 @@ export const LoadingSpinner = (props: { size?: number }) => {
       </svg>
       <span className="sr-only">Loading...</span>
     </div>
-  );
-};
+  )
+}
