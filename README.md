@@ -17,5 +17,5 @@ A Twitter/Threads style app created to test out various tech and services
 ### Libraries
 
 - [Zod](https://zod.dev/)
-- [dayjs](https://day.js.org/)
+- [Day.js](https://day.js.org/)
 - [react-hot-toast](https://react-hot-toast.com/)

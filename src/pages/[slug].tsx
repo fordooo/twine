@@ -7,9 +7,41 @@ import { appRouter } from '~/server/api/root'
 import { db } from '~/server/db'
 import { api } from '~/utils/api'
 import { PageLayout } from '~/components/layout'
+import { LoadingSpinner } from '~/components/loading'
+import { PostView } from '~/components/post-view'
 
 type PageProps = {
   username: string
+}
+
+const ProfileFeed = (props: { userId: string }) => {
+  const { data: posts, isLoading } = api.posts.getPostsByUserId.useQuery({
+    userId: props.userId
+  })
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <LoadingSpinner size={40} />
+      </div>
+    )
+  }
+
+  if (!posts || posts.length === 0) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <p className="text-2xl">No posts yet</p>
+      </div>
+    )
+  }
+
+  return (
+    <>
+      {posts?.map(({ post, author }) => (
+        <PostView key={post.id} post={post} author={author} />
+      ))}
+    </>
+  )
 }
 
 const ProfilePage: React.FC<PageProps> = ({ username }) => {
@@ -37,6 +69,7 @@ const ProfilePage: React.FC<PageProps> = ({ username }) => {
         </div>
         <div className="h-16"></div>
         <div className="border-b border-slate-400 p-4 text-2xl font-bold">{`@${data.username}`}</div>
+        <ProfileFeed userId={data.id} />
       </PageLayout>
     </>
   )
