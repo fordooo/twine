@@ -10,6 +10,7 @@ export const PageLayout = (props: PropsWithChildren) => {
       <div className="flex h-full w-full flex-col border-x border-slate-400 md:max-w-2xl">
         <header className="flex h-16 w-full items-center justify-between border-b border-slate-400 p-4">
           <Link href="/" title="Home" aria-label="Home">
+            {/* TODO: Add logo svg */}
             <p>LOGO</p>
           </Link>
           <div className="flex items-center gap-4">

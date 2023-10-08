@@ -51,6 +51,7 @@ export const postsRouter = createTRPCRouter({
     async ({ ctx }) =>
       await ctx.db.post
         .findMany({
+          // TODO: setup pagination for infinite scroll
           take: 100,
           orderBy: {
             createdAt: 'desc'
@@ -58,6 +59,19 @@ export const postsRouter = createTRPCRouter({
         })
         .then(addUserDataToPosts)
   ),
+  getPostById: publicProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const post = await ctx.db.post.findUnique({
+        where: {
+          id: input.id
+        }
+      })
+
+      if (!post) throw new TRPCError({ code: 'NOT_FOUND' })
+
+      return (await addUserDataToPosts([post]))[0]
+    }),
   getPostsByUserId: publicProcedure
     .input(z.object({ userId: z.string() }))
     .query(async ({ ctx, input }) =>

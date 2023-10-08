@@ -6,6 +6,7 @@ import { api } from '~/utils/api'
 import '~/styles/globals.css'
 
 const MyApp: AppType = ({ Component, pageProps }) => {
+  // TODO: Add og tags, descriptions, etc
   return (
     <ClerkProvider {...pageProps}>
       <Head>
